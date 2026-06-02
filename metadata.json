@@ -1,0 +1,6 @@
+{
+  "name": "AI-PDF Scanner Multitools",
+  "description": "Multi Tool Hub with 20+ frontend-only tools",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
