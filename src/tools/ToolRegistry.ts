@@ -21,6 +21,8 @@ export const TOOLS: Tool[] = [
   { id: 'calc-hourly', name: 'Hourly Rate / Earning', description: 'Calculate freelance hourly rate and project earnings.', category: 'calc', icon: 'briefcase' },
   { id: 'calc-yt-rev', name: 'YouTube Revenue Estimator', description: 'Estimate YouTube ad earnings based on views and CPM.', category: 'calc', icon: 'youtube' },
   { id: 'calc-roi', name: 'ROI Calculator', description: 'Calculate Return on Investment and net profit.', category: 'calc', icon: 'percent' },
+  { id: 'calc-discount', name: 'Discount Calculator', description: 'Calculate final price after discount and amount saved.', category: 'calc', icon: 'tag' },
+  { id: 'calc-loan-comp', name: 'Loan Comparator', description: 'Compare two different loan scenarios side-by-side.', category: 'calc', icon: 'git-compare' },
   
   // Utility
   { id: 'util-seo-check', name: 'SEO Checklist', description: 'Step-by-step checklist to audit on-page SEO.', category: 'utility', icon: 'check-square' },

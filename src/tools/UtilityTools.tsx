@@ -218,21 +218,69 @@ function YTThumbnailDownloader() {
 
 function QRCreator() {
   const [text, setText] = useState('https://aipdfmultitool.io');
+  const [color, setColor] = useState('#000000');
+  const [bgColor, setBgColor] = useState('#ffffff');
   const [qrUrl, setQrUrl] = useState('');
+  const [svgUrl, setSvgUrl] = useState('');
 
   const generate = () => {
     if (!text) return;
-    setQrUrl(`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(text)}`);
+    const fg = color.replace('#', '');
+    const bg = bgColor.replace('#', '');
+    const base = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(text)}&color=${fg}&bgcolor=${bg}`;
+    setQrUrl(`${base}&format=png`);
+    setSvgUrl(`${base}&format=svg`);
+  };
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.error('Download failed', e);
+      // Fallback
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.download = filename;
+      a.click();
+    }
   };
 
   return (
     <div className="space-y-4">
       <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Enter text or URL..." className="w-full bg-btn border border-cyan-accent/30 rounded p-2 text-main-white focus:outline-none focus:border-cyan-accent transition-colors" />
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-dim text-sm mb-1 block">QR Color</label>
+          <div className="flex bg-btn border border-cyan-accent/30 rounded p-1">
+            <input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-1/4 rounded cursor-pointer bg-transparent border-0 p-0" />
+            <span className="text-main-white text-sm my-auto text-center w-3/4">{color.toUpperCase()}</span>
+          </div>
+        </div>
+        <div>
+          <label className="text-dim text-sm mb-1 block">Background</label>
+          <div className="flex bg-btn border border-cyan-accent/30 rounded p-1">
+            <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="h-8 w-1/4 rounded cursor-pointer bg-transparent border-0 p-0" />
+            <span className="text-main-white text-sm my-auto text-center w-3/4">{bgColor.toUpperCase()}</span>
+          </div>
+        </div>
+      </div>
+
       <button onClick={generate} className="w-full bg-cyan-accent text-main font-bold py-2 rounded hover:glow-shadow transition-shadow">Generate QR Code</button>
+      
       {qrUrl && (
         <div className="mt-4 flex flex-col items-center gap-4">
           <div className="flex justify-center p-4 bg-white rounded w-full max-w-[240px]">
-            <img src={qrUrl} alt="QR Code" className="w-full" />
+             {/* Using a key to force re-render when urls change so it updates correctly */}
+            <img key={qrUrl} src={qrUrl} alt="QR Code" className="w-full" />
           </div>
           <div className="flex gap-2 w-full">
             <button 
@@ -248,15 +296,18 @@ function QRCreator() {
             >
               Share Link
             </button>
-            <a 
-              href={qrUrl} 
-              target="_blank" 
-              rel="noreferrer" 
-              download="qrcode.png"
+            <button
+              onClick={() => handleDownload(qrUrl, 'qrcode.png')}
               className="flex-1 bg-cyan-accent text-main font-bold py-2 rounded hover:glow-shadow transition-shadow text-sm text-center items-center justify-center flex"
             >
-              Save Image
-            </a>
+              Save PNG
+            </button>
+            <button
+              onClick={() => handleDownload(svgUrl, 'qrcode.svg')}
+              className="flex-1 bg-cyan-alt text-main font-bold py-2 rounded hover:glow-shadow transition-shadow text-sm text-center items-center justify-center flex"
+            >
+              Save SVG
+            </button>
           </div>
         </div>
       )}

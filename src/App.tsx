@@ -13,6 +13,33 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [recentToolIds, setRecentToolIds] = useState<string[]>([]);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    try {
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        setTheme(storedTheme);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light');
+      document.body.classList.remove('dark');
+    } else {
+      document.body.classList.remove('light');
+      document.body.classList.add('dark');
+    }
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [theme]);
 
   useEffect(() => {
     try {
@@ -127,6 +154,14 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <button 
+            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-2 text-sm text-dim hover:text-cyan-accent transition-colors"
+            title="Toggle Theme"
+          >
+            {theme === 'dark' ? <Icons.Sun size={18} /> : <Icons.Moon size={18} />}
+            <span className="hidden sm:inline-block">Theme</span>
+          </button>
           <button 
             onClick={() => window.print()}
             className="flex items-center gap-2 text-sm text-dim hover:text-cyan-accent transition-colors"

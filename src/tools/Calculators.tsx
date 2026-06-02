@@ -8,6 +8,8 @@ export function Calculators({ toolId }: { toolId: string }) {
   if (toolId === 'calc-hourly') return <HourlyRateCalculator />;
   if (toolId === 'calc-yt-rev') return <YouTubeRevenueCalculator />;
   if (toolId === 'calc-roi') return <ROICalculator />;
+  if (toolId === 'calc-discount') return <DiscountCalculator />;
+  if (toolId === 'calc-loan-comp') return <LoanComparator />;
   return null;
 }
 
@@ -265,6 +267,145 @@ function ROICalculator() {
           <div>
             <span className="text-dim block text-sm">ROI Percentage</span>
             <span className="text-xl text-cyan-accent font-bold">{result.roi}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DiscountCalculator() {
+  const [price, setPrice] = useState('');
+  const [discount, setDiscount] = useState('');
+  const [result, setResult] = useState<{ finalPrice: string, saved: string } | null>(null);
+
+  const calculate = () => {
+    const p = parseFloat(price);
+    const d = parseFloat(discount);
+    if (isNaN(p) || isNaN(d) || p < 0 || d < 0 || d > 100) return;
+
+    const savedAmount = p * (d / 100);
+    const finalP = p - savedAmount;
+
+    setResult({
+      finalPrice: `$${finalP.toFixed(2)}`,
+      saved: `$${savedAmount.toFixed(2)}`
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <InputField label="Original Price ($)" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} />
+      <InputField label="Discount Percentage (%)" type="number" value={discount} onChange={(e: any) => setDiscount(e.target.value)} />
+      <button onClick={calculate} className="w-full bg-cyan-accent text-main font-bold py-2 rounded hover:glow-shadow transition-shadow">Calculate Discount</button>
+      {result && (
+        <div className="p-4 mt-4 bg-btn border border-cyan-accent/50 rounded flex flex-col gap-3 text-center">
+          <div>
+            <span className="text-dim block text-sm">Amount Saved</span>
+            <span className="text-xl text-green-400 font-bold">{result.saved}</span>
+          </div>
+          <div>
+            <span className="text-dim block text-sm">Final Price</span>
+            <span className="text-2xl text-cyan-accent font-bold">{result.finalPrice}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LoanComparator() {
+  const [loan1, setLoan1] = useState('');
+  const [rate1, setRate1] = useState('');
+  const [months1, setMonths1] = useState('');
+
+  const [loan2, setLoan2] = useState('');
+  const [rate2, setRate2] = useState('');
+  const [months2, setMonths2] = useState('');
+
+  const [result, setResult] = useState<{
+    emi1: string, totalInt1: string, totalPay1: string,
+    emi2: string, totalInt2: string, totalPay2: string
+  } | null>(null);
+
+  const calculate = () => {
+    const P1 = parseFloat(loan1);
+    const R1 = parseFloat(rate1) / 12 / 100;
+    const N1 = parseFloat(months1);
+
+    const P2 = parseFloat(loan2);
+    const R2 = parseFloat(rate2) / 12 / 100;
+    const N2 = parseFloat(months2);
+
+    if (!P1 || !R1 || !N1 || !P2 || !R2 || !N2) return;
+
+    const emiVal1 = (P1 * R1 * Math.pow(1 + R1, N1)) / (Math.pow(1 + R1, N1) - 1);
+    const totalPay1 = emiVal1 * N1;
+    const totalInt1 = totalPay1 - P1;
+
+    const emiVal2 = (P2 * R2 * Math.pow(1 + R2, N2)) / (Math.pow(1 + R2, N2) - 1);
+    const totalPay2 = emiVal2 * N2;
+    const totalInt2 = totalPay2 - P2;
+
+    setResult({
+      emi1: `$${emiVal1.toFixed(2)}`,
+      totalInt1: `$${totalInt1.toFixed(2)}`,
+      totalPay1: `$${totalPay1.toFixed(2)}`,
+      emi2: `$${emiVal2.toFixed(2)}`,
+      totalInt2: `$${totalInt2.toFixed(2)}`,
+      totalPay2: `$${totalPay2.toFixed(2)}`,
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4 p-4 bg-btn border border-cyan-accent/20 rounded">
+          <h3 className="text-cyan-accent font-bold mb-2">Loan Option 1</h3>
+          <InputField label="Loan Amount ($)" type="number" value={loan1} onChange={(e: any) => setLoan1(e.target.value)} />
+          <InputField label="Annual Interest Rate (%)" type="number" value={rate1} onChange={(e: any) => setRate1(e.target.value)} />
+          <InputField label="Tenure (Months)" type="number" value={months1} onChange={(e: any) => setMonths1(e.target.value)} />
+        </div>
+        <div className="space-y-4 p-4 bg-btn border border-cyan-accent/20 rounded">
+          <h3 className="text-cyan-accent font-bold mb-2">Loan Option 2</h3>
+          <InputField label="Loan Amount ($)" type="number" value={loan2} onChange={(e: any) => setLoan2(e.target.value)} />
+          <InputField label="Annual Interest Rate (%)" type="number" value={rate2} onChange={(e: any) => setRate2(e.target.value)} />
+          <InputField label="Tenure (Months)" type="number" value={months2} onChange={(e: any) => setMonths2(e.target.value)} />
+        </div>
+      </div>
+      <button onClick={calculate} className="w-full bg-cyan-accent text-main font-bold py-2 rounded hover:glow-shadow transition-shadow">Compare Loans</button>
+
+      {result && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div className="p-4 bg-btn border border-cyan-accent/50 rounded flex flex-col gap-3 text-center">
+            <h4 className="font-bold text-cyan-accent border-b border-cyan-accent/20 pb-2">Option 1 Results</h4>
+            <div>
+              <span className="text-dim block text-sm">Monthly EMI</span>
+              <span className="text-xl text-main-white font-bold">{result.emi1}</span>
+            </div>
+            <div>
+              <span className="text-dim block text-sm">Total Interest</span>
+              <span className="text-xl text-yellow-400 font-bold">{result.totalInt1}</span>
+            </div>
+            <div>
+              <span className="text-dim block text-sm">Total Payment</span>
+              <span className="text-xl text-cyan-accent font-bold">{result.totalPay1}</span>
+            </div>
+          </div>
+          <div className="p-4 bg-btn border border-cyan-accent/50 rounded flex flex-col gap-3 text-center">
+            <h4 className="font-bold text-cyan-accent border-b border-cyan-accent/20 pb-2">Option 2 Results</h4>
+            <div>
+              <span className="text-dim block text-sm">Monthly EMI</span>
+              <span className="text-xl text-main-white font-bold">{result.emi2}</span>
+            </div>
+            <div>
+              <span className="text-dim block text-sm">Total Interest</span>
+              <span className="text-xl text-yellow-400 font-bold">{result.totalInt2}</span>
+            </div>
+            <div>
+              <span className="text-dim block text-sm">Total Payment</span>
+              <span className="text-xl text-cyan-accent font-bold">{result.totalPay2}</span>
+            </div>
           </div>
         </div>
       )}
